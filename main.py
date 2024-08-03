@@ -51,6 +51,7 @@ def main():
     print(f"[Info] Packaging has succeeded and the new files are available at the folder '{out_path}'")
     print('[Info] To install these changes, replace the game files with the packaged ones')
 
+
 def get_index_input(input_message: str, items_list: list[str]) -> int:
     for i, item in enumerate(items_list):
         print(f'{i + 1}) {item}')
@@ -64,18 +65,22 @@ def get_index_input(input_message: str, items_list: list[str]) -> int:
                 raise KeyboardInterrupt
             index = int(input_index) - 1
             if index < 0:
-                raise ValueError
+                raise IndexError
             items_list[index]
         except KeyboardInterrupt:
             if input_index.lower() != 'exit':
                 print('')
             print('[Info] Exit command entered')
             exit(0)
-        # May trigger a ValueError or IndexError
-        except:
+        # TODO: Can I merge the 2 below except blocks?
+        except IndexError:
+            print('[Warning] Please enter a valid number from the list')
+            index = -1
+        except ValueError:
             print('[Warning] Please enter a valid number from the list')
             index = -1
     return index
+
 
 if __name__ == '__main__':
     main()
