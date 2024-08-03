@@ -21,6 +21,13 @@ LEVEL_DIR_REGEX = r'LVL[0-9]{3}'
 
 
 def alice_compressor(indir_path: str, outdir_path: str):
+    """
+    Compress the files for Alice in Wonderland
+
+    Args:
+        indir_path (str) - The path where the uncompressed files are located
+        outdir_path (str) - The path to write the compressed files
+    """
     COMPRESSION_LEVEL = 1
     COMPRESSION_FUNC = gzip.compress
 

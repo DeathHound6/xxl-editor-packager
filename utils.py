@@ -15,18 +15,31 @@ def compress_file(input_path: str, output_path: str, compression_level: int, com
     print(f"[Info] Compressing file '{input_path}'")
     with open(input_path, "rb") as read:
         compressed_bytes = compression_func(read.read(), compresslevel=compression_level)
-    # Write compressed file to temp dir
+    print(f"[Info] Writing compressed data to '{output_path}'")
     with open(output_path, "wb") as write:
         write.write(compressed_bytes)
 
 
-def post_compress_all_files(temp_dir: str, dst: str):
+def post_compress_all_files(temp_dir: str, dest_dir: str):
+    """
+    Perform the final cleanup after the files have been compressed
+
+    Args:
+        temp_dir (str) - The path to the temp directory
+        dest_dir (str) - The directory path where the compressed files will be copied to
+    """
     print("[Info] Copying archived files")
-    shutil.copytree(src=temp_dir, dst=dst, dirs_exist_ok=True)
+    shutil.copytree(src=temp_dir, dst=dest_dir, dirs_exist_ok=True)
     print("[Info] Deleting temp directory")
     shutil.rmtree(temp_dir)
 
 
 def create_path_if_not_exists(path: str) -> str:
+    """
+    Create the given directory or file if it does not yet exist
+
+    Args:
+        path (str) - The path to the directory or file
+    """
     if not os.path.exists(path):
         os.mkdir(path)
