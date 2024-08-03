@@ -32,7 +32,7 @@ def alice_compressor(indir_path: str, outdir_path: str):
         if re.match(LEVEL_DIR_REGEX, name.upper()) is not None:
             for level_filename in os.listdir(f'{indir_path}/{name}'):
 
-                # Only package `kwn` files within the level folders 
+                # Only package `kwn` files within the level folders
                 if re.match(K_FILE_REGEX, level_filename.upper()) is None:
                     print(f"[Info] Found file '{level_filename}' - skipping archival")
                     continue

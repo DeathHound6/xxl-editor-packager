@@ -19,11 +19,13 @@ def compress_file(input_path: str, output_path: str, compression_level: int, com
     with open(output_path, "wb") as write:
         write.write(compressed_bytes)
 
+
 def post_compress_all_files(temp_dir: str, dst: str):
     print("[Info] Copying archived files")
     shutil.copytree(src=temp_dir, dst=dst, dirs_exist_ok=True)
     print("[Info] Deleting temp directory")
     shutil.rmtree(temp_dir)
+
 
 def create_path_if_not_exists(path: str) -> str:
     if not os.path.exists(path):
