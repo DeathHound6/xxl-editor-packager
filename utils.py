@@ -8,13 +8,13 @@ import json
 import re
 
 STEAM_APP_IDS = [
-    None, # xxl1
-    None, # xxl2
-    None, # arthur
-    None, # olympic
-    None, # spyro
-    '316030', # alice
-    None # httyd
+    None,  # xxl1
+    None,  # xxl2
+    None,  # arthur
+    None,  # olympic
+    None,  # spyro
+    '316030',  # alice
+    None  # httyd
 ]
 
 
@@ -173,7 +173,8 @@ def read_steam_vdf_acf_file(file_path: str) -> Union[dict[str, Any], None]:
                 continue
 
             # When opening or closing a dict
-            if (char := line.strip()) in ['{', '}']:
+            char = line.strip()
+            if char in ['{', '}']:
                 json_str += char
                 # If closing an dict and there is more fields after
                 # We also don't want to throw an index error
@@ -182,13 +183,13 @@ def read_steam_vdf_acf_file(file_path: str) -> Union[dict[str, Any], None]:
 
             # Dict key names
             # Opening the inner dict is on the line after
-            if re.match(r'^"[0-9a-zA-Z]+"$', (l := line.strip())) is not None and \
-               lines[index + 1].strip() == '{':
-                json_str += f'{l}:'
+            if re.match(r'^"[0-9a-zA-Z]+"$', char) is not None and lines[index + 1].strip() == '{':
+                json_str += f'{char}:'
 
             # String fields
-            if re.match(r'^"[a-zA-Z0-9]+":"(.+)?"$', (l := line.strip().replace('\t\t', ':'))) is not None:
-                json_str += l
+            char = line.strip().replace('\t\t', ':')
+            if re.match(r'^"[a-zA-Z0-9]+":"(.+)?"$', char) is not None:
+                json_str += char
                 # If there is another field after
                 if lines[index + 1].strip() not in ['}', '']:
                     json_str += ','

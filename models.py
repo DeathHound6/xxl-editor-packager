@@ -12,18 +12,21 @@ GAME_NAMES = [
     "How to Train your Dragon"
 ]
 
+
 class Platform(Enum):
-    KWN = 0 # pc
-    KP2 = 1 # ps2
-    KGC = 2 # gcn
-    KPP = 3 # psp
-    KRV = 4 # wii
-    KXE = 5 # xbox360
-    KP3 = 6 # ps3
+    KWN = 0  # pc
+    KP2 = 1  # ps2
+    KGC = 2  # gcn
+    KPP = 3  # psp
+    KRV = 4  # wii
+    KXE = 5  # xbox360
+    KP3 = 6  # ps3
+
 
 @dataclass
 class XXLProjectEditor:
     initial_level: int = None
+
 
 @dataclass
 class XXLProjectGame:
@@ -31,15 +34,18 @@ class XXLProjectGame:
     is_remaster: bool = None
     platform: Platform = None
 
+
 @dataclass
 class XXLProjectMeta:
     name: str = None
+
 
 @dataclass
 class XXLProjectPaths:
     game_module: str = None
     input_path: str = None
     output_path: str = None
+
 
 @dataclass
 class XXLProject:
