@@ -1,54 +1,72 @@
+import sys
 import os.path
 import compressors
+from utils import replace_steam_game_files, read_xxl_editor_xecproj_file
+from models import XXLProject, Platform, GAME_NAMES
 
-COMPRESSIONS = {
-    "Alice": compressors.alice_compressor
-}
+COMPRESSIONS = [
+    None,
+    None,
+    None,
+    None,
+    None,
+    compressors.alice_compressor,
+    None
+]
 
 
 def main():
+    if sys.platform != "win32":
+        print("[Error] This program can only be run on Windows systems")
+        exit(1)
+
     path = os.path.abspath(f"{os.getcwd()}/../projectPaths.txt")
     if not os.path.exists(path):
         print("[Error] Please ensure that you have created a project using the XXL Editor first")
         exit(1)
 
     print(f"[Info] Reading '{path}'")
-    project_paths: list[str] = []
+    projects: list[XXLProject] = []
     with open(path) as project_paths_file:
         paths = project_paths_file.readlines()
         for path in paths:
-            path = path.replace("\r", "").replace("\n", "")
-            path_parts = path.split(os.sep)
-            path_parts.pop()
-            project_paths.append(os.sep.join(path_parts))
+            path = os.path.abspath(path.replace("\r", "").replace("\n", ""))
+            xxl_proj = read_xxl_editor_xecproj_file(path)
+            if xxl_proj is not None:
+                projects.append(xxl_proj)
 
-    if len(project_paths) == 0:
+    if len(projects) == 0:
         print("[Error] Please ensure that you have created a project using the XXL Editor first")
         exit(1)
 
-    project_path_index = get_index_input(
+    project_index = get_index_input(
         input_message="[Input] Select the project path number you wish to package > ",
-        items_list=project_paths
+        items_list=[f'{xxl.meta.name} ({xxl.paths.output_path})' for xxl in projects]
     )
-
+    project = projects[project_index]
     print('')
 
-    compressors_list = list(COMPRESSIONS.keys())
-    compressor_index = get_index_input(
-        input_message="[Input] Select the game number to package for > ",
-        items_list=compressors_list
-    )
-
     print("[Info] Beginning packaging. This may take a while...")
-    game_name = compressors_list[compressor_index]
+    game_name = GAME_NAMES[project.game.id - 1]
     out_path = os.path.abspath(f'{os.getcwd()}/out/{game_name}')
-    compression_func = COMPRESSIONS[game_name]
+    compression_func = COMPRESSIONS[project.game.id - 1]
     compression_func(
-        indir_path=project_paths[project_path_index],
+        indir_path=projects[project_index].paths.output_path,
         outdir_path=out_path
     )
 
-    print(f"[Info] Packaging has succeeded and the new files are available at the folder '{out_path}'")
+    print(f"[Info] Packaging has succeeded and the new files are available at '{out_path}'")
+
+    if projects[project_index].game.platform is Platform.KWN:
+        replace_steam_files_input = get_index_input(
+            input_message="[Input] Do you want to replace the Steam files? > ",
+            items_list=['Yes', 'No']
+        )
+        if replace_steam_files_input == 0:
+            replace_steam_game_files(compressed_dir=out_path, game_id=project.game.id)
+            return
+        print('[Info] The compressed files will not be automatically installed to Steam')
+
     print("[Info] To install these changes, replace the game files with the packaged ones")
 
 
