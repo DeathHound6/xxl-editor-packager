@@ -33,7 +33,9 @@ def main():
             path = os.path.abspath(path.replace("\r", "").replace("\n", ""))
             xxl_proj = read_xxl_editor_xecproj_file(path)
             if xxl_proj is not None:
-                projects.append(xxl_proj)
+                # If the game has a compressor implemented
+                if (xxl_proj.game.id - 1) in COMPRESSIONS and COMPRESSIONS[xxl_proj.game.id - 1] is not None:
+                    projects.append(xxl_proj)
 
     if len(projects) == 0:
         print("[Error] Please ensure that you have created a project using the XXL Editor first")
