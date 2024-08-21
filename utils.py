@@ -185,6 +185,7 @@ def read_steam_vdf_acf_file(file_path: str) -> Union[dict[str, Any], None]:
     file_json = json.loads(json_str)
     return file_json
 
+
 def get_threads_data_list(worker_func: Callable, args_list: list[Any]) -> list[Thread]:
     """
     Get a list of threads with the data list elements spread equally amongst the threads
