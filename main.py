@@ -21,7 +21,7 @@ def main():
         exit(1)
 
     path = os.path.abspath(f"{os.getcwd()}/../projectPaths.txt")
-    if not os.path.exists(path):
+    if os.path.exists(path) is False:
         print("[Error] Please ensure that you have created a project using the XXL Editor first")
         exit(1)
 
@@ -34,7 +34,7 @@ def main():
             xxl_proj = read_xxl_editor_xecproj_file(path)
             if xxl_proj is not None:
                 # If the game has a compressor implemented
-                if (xxl_proj.game.id - 1) in COMPRESSIONS and COMPRESSIONS[xxl_proj.game.id - 1] is not None:
+                if (xxl_proj.game.id - 1) < len(COMPRESSIONS) and COMPRESSIONS[xxl_proj.game.id - 1] is not None:
                     projects.append(xxl_proj)
 
     if len(projects) == 0:
@@ -66,6 +66,7 @@ def main():
         )
         if replace_steam_files_input == 0:
             replace_steam_game_files(compressed_dir=out_path, game_id=project.game.id)
+            print('[Info] Steam files have been replaced')
             return
         print('[Info] The compressed files will not be automatically installed to Steam')
 
@@ -101,11 +102,7 @@ def get_index_input(input_message: str, items_list: list[str]) -> int:
                 print("")
             print("[Info] Exit command entered")
             exit(0)
-        # TODO: Can I merge the 2 below except blocks?
-        except IndexError:
-            print("[Warning] Please enter a valid number from the list")
-            index = -1
-        except ValueError:
+        except (IndexError, ValueError):
             print("[Warning] Please enter a valid number from the list")
             index = -1
     return index

@@ -1,23 +1,15 @@
-from utils import compress_file, create_path_if_not_exists, post_compress_all_files
+from utils import compress_file, create_path_if_not_exists, Platform, get_threads_data_list
+from typing import Any
 import tempfile
 import os
 import os.path
 import re
 import gzip
+import shutil
 
-FILE_FORMATS = {
-    'PC': 'KWN',
-    'Wii': 'KRV',
-    'GameCube': 'KGC',
-    'PS2': 'KP2',
-    'PS3': 'KP3',
-    'PSP': 'KPP',
-    'Xbox360': 'KXE'
-}
-_K_FILE_EXTENSION_LIST = list(FILE_FORMATS.values())
-GAME_K_FILE_REGEX = rf'GAME.({"|".join(_K_FILE_EXTENSION_LIST)})'
-K_FILE_REGEX = rf'[A-Z0-9]+.({"|".join(_K_FILE_EXTENSION_LIST)})'
-LEVEL_DIR_REGEX = r'LVL[0-9]{3}'
+GAME_K_FILE_REGEX = rf'^GAME.({"|".join(list(Platform.__members__.keys()))})$'
+K_FILE_REGEX = rf'^[A-Z0-9]+.({"|".join(list(Platform.__members__.keys()))})$'
+LEVEL_DIR_REGEX = r'^LVL[0-9]{3}$'
 
 
 def alice_compressor(indir_path: str, outdir_path: str):
@@ -28,12 +20,21 @@ def alice_compressor(indir_path: str, outdir_path: str):
         indir_path (str) - The path where the uncompressed files are located
         outdir_path (str) - The path to write the compressed files
     """
-    COMPRESSION_LEVEL = 1
-    COMPRESSION_FUNC = gzip.compress
+    def thread_worker(data_list: list[dict[str, Any]]):
+        COMPRESSION_LEVEL = 1
+        COMPRESSION_FUNC = gzip.compress
+        for data in data_list:
+            compress_file(
+                input_path=data['input'],
+                output_path=data['output'],
+                compression_level=COMPRESSION_LEVEL,
+                compression_func=COMPRESSION_FUNC
+            )
 
     try:
         print('[Info] Creating temp directory')
         temp_dir = tempfile.mkdtemp(prefix='temp-')
+        paths = []
         for name in os.listdir(indir_path):
 
             # Cycle through level files
@@ -48,12 +49,10 @@ def alice_compressor(indir_path: str, outdir_path: str):
                     # Create this level folder in temp dir
                     create_path_if_not_exists(f'{temp_dir}/{name}')
 
-                    compress_file(
-                        input_path=os.path.abspath(f'{indir_path}/{name}/{level_filename}'),
-                        output_path=os.path.abspath(f'{temp_dir}/{name}/{level_filename}'),
-                        compression_level=COMPRESSION_LEVEL,
-                        compression_func=COMPRESSION_FUNC
-                    )
+                    paths.append({
+                        'input': os.path.abspath(f'{indir_path}/{name}/{level_filename}'),
+                        'output': os.path.abspath(f'{temp_dir}/{name}/{level_filename}')
+                    })
 
             # Cycle through root folder files
             elif re.match(K_FILE_REGEX, name.upper()) is not None:
@@ -63,18 +62,24 @@ def alice_compressor(indir_path: str, outdir_path: str):
                     print(f"[Info] Found file {name}' - skipping archival")
                     continue
 
-                compress_file(
-                    input_path=os.path.abspath(f'{indir_path}/{name}'),
-                    output_path=os.path.abspath(f'{temp_dir}/{name}'),
-                    compression_level=COMPRESSION_LEVEL,
-                    compression_func=COMPRESSION_FUNC
-                )
+                paths.append({
+                    'input': os.path.abspath(f'{indir_path}/{name}'),
+                    'output': os.path.abspath(f'{temp_dir}/{name}')
+                })
+
+        threads = get_threads_data_list(thread_worker, paths)
+        [thread.start() for thread in threads]
+        [thread.join() for thread in threads]
 
         # Create output directory if it doesn't exist
         outdir_path_parts = outdir_path.split(os.sep)
         create_path_if_not_exists(os.sep.join(outdir_path_parts)[0:len(outdir_path_parts) - 1])
         create_path_if_not_exists(outdir_path)
+
+        print("[Info] Copying archived files")
+        shutil.copytree(src=temp_dir, dst=outdir_path, dirs_exist_ok=True)
     except KeyboardInterrupt:
         raise
     finally:
-        post_compress_all_files(temp_dir=temp_dir, dest_dir=outdir_path)
+        print("[Info] Deleting temp directory")
+        shutil.rmtree(temp_dir)

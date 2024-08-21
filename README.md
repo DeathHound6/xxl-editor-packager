@@ -34,4 +34,5 @@ A script to automatically compress all game files outputted from [XXL Editor](ht
 ## Notes
 - Copying uncompressed files into the game's files, will cause the game to crash
     - That's what this project will help to prevent!
-- Some changes made in XXL Editor appear well, but for some currently unknown reason, cause the game to crash
+- Some changes made in XXL Editor appear fine in the editor, but cause the game to crash
+    - These are issues with the editor rather than the compression

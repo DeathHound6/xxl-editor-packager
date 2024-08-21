@@ -1,5 +1,7 @@
 from models import XXLProject, XXLProjectEditor, XXLProjectGame, XXLProjectMeta, XXLProjectPaths, Platform
 from typing import Callable, Any, Union
+from threading import Thread
+import os
 import os.path
 import shutil
 import winreg
@@ -34,20 +36,6 @@ def compress_file(input_path: str, output_path: str, compression_level: int, com
     print(f"[Info] Writing compressed data to '{output_path}'")
     with open(output_path, "wb") as write:
         write.write(compressed_bytes)
-
-
-def post_compress_all_files(temp_dir: str, dest_dir: str):
-    """
-    Perform the final cleanup after the files have been compressed
-
-    Args:
-        temp_dir (str) - The path to the temp directory
-        dest_dir (str) - The directory path where the compressed files will be copied to
-    """
-    print("[Info] Copying archived files")
-    shutil.copytree(src=temp_dir, dst=dest_dir, dirs_exist_ok=True)
-    print("[Info] Deleting temp directory")
-    shutil.rmtree(temp_dir)
 
 
 def create_path_if_not_exists(path: str):
@@ -196,3 +184,24 @@ def read_steam_vdf_acf_file(file_path: str) -> Union[dict[str, Any], None]:
 
     file_json = json.loads(json_str)
     return file_json
+
+def get_threads_data_list(worker_func: Callable, args_list: list[Any]) -> list[Thread]:
+    """
+    Get a list of threads with the data list elements spread equally amongst the threads
+
+    Args:
+        worker_func (Callable) - The function the threads will execute
+        args_list (list[Any]) - The list of data to be split amongst the threads
+    Returns:
+        list[Thread] - The list of unstarted threads
+    """
+    num_threads = os.cpu_count() - 1
+    args_length = len(args_list)
+    chunk_size = args_length // num_threads
+    data = []
+    for i in range(num_threads):
+        start_index = i * chunk_size
+        end_index = start_index + chunk_size if i != num_threads - 1 else args_length
+        data.append(args_list[start_index:end_index])
+    threads = [Thread(target=worker_func, args=(data[i],)) for i in range(num_threads)]
+    return threads
