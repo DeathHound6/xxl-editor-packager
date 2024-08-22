@@ -73,8 +73,12 @@ def alice_compressor(indir_path: str, outdir_path: str):
 
         # Create output directory if it doesn't exist
         outdir_path_parts = outdir_path.split(os.sep)
-        create_path_if_not_exists(os.sep.join(outdir_path_parts)[0:len(outdir_path_parts) - 1])
-        create_path_if_not_exists(outdir_path)
+        for i in range(len(outdir_path_parts)):
+            # Skip on the first folder
+            # First - the drive/mount letter
+            if i == 0:
+                continue
+            create_path_if_not_exists(os.sep.join(outdir_path_parts[0:i]))
 
         print("[Info] Copying archived files")
         shutil.copytree(src=temp_dir, dst=outdir_path, dirs_exist_ok=True)
