@@ -2,7 +2,7 @@ import sys
 import os.path
 import compressors
 from utils import replace_steam_game_files, read_xxl_editor_xecproj_file
-from models import XXLProject, Platform, GAME_NAMES
+from models import XXLProject, Platform, GAME_NAMES, PLATFORM_NAMES
 
 COMPRESSIONS = [
     None,
@@ -50,7 +50,8 @@ def main():
 
     print("[Info] Beginning packaging. This may take a while...")
     game_name = GAME_NAMES[project.game.id - 1]
-    out_path = os.path.abspath(f'{os.getcwd()}/out/{game_name}')
+    platform_name = PLATFORM_NAMES[project.game.platform.name]
+    out_path = os.path.abspath(f'{os.getcwd()}/out/{game_name}/{platform_name}')
     compression_func = COMPRESSIONS[project.game.id - 1]
     compression_func(
         indir_path=projects[project_index].paths.output_path,

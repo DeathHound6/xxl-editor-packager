@@ -1,7 +1,7 @@
 from enum import Enum
 from dataclasses import dataclass
 
-# List indexes align with XXL config game id
+# List indexes align with XXL config ids
 GAME_NAMES = [
     "Asterix XXL",
     "Asterix XXL2",
@@ -11,16 +11,25 @@ GAME_NAMES = [
     "Alice in Wonderland",
     "How to Train your Dragon"
 ]
+PLATFORM_NAMES = [
+    "Steam",
+    "PS2",
+    "GCN",
+    "PSP",
+    "Wii",
+    "Xbox360",
+    "PS3"
+]
 
 
 class Platform(Enum):
-    KWN = 0  # pc
-    KP2 = 1  # ps2
-    KGC = 2  # gcn
-    KPP = 3  # psp
-    KRV = 4  # wii
-    KXE = 5  # xbox360
-    KP3 = 6  # ps3
+    KWN = 0
+    KP2 = 1
+    KGC = 2
+    KPP = 3
+    KRV = 4
+    KXE = 5
+    KP3 = 6
 
 
 @dataclass
